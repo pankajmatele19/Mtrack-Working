@@ -97,7 +97,7 @@ Route::group(['middleware' => 'auth'], function () {
     });
 
     Route::get('/sign_out', [UserManagementController::class, 'sign_out'])->name('user.sign_out');
-
+    
     Route::get('/dashboard', [DashboardManagementController::class, 'dashboard'])->name('dashboard');
 
     // Route::get('/myprofile', [ProfileController::class, 'view_profile'])->name('myprofile');
@@ -106,15 +106,18 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/myprofile', [ProfileController::class, 'update_profile'])->name('myprofile.update');
     Route::post('/company', [ProfileController::class, 'update_company'])->name('myprofile.company.update');
 
+
     Route::get('/users', [UserManagementController::class, 'users_list'])->name('users');
     Route::get('/user/invite', [UserManagementController::class, 'add_edit_user'])->name('users.add_user');
     Route::post('/user/invite', [UserManagementController::class, 'post_add_edit_user'])->name('users.post_add_user');
     Route::get('/user/edit/{user_id}', [UserManagementController::class, 'add_edit_user'])->name('users.edit_user');
     Route::post('/user/edit/{user_id}', [UserManagementController::class, 'post_add_edit_user'])->name('users.post_edit_user');
 
+
     Route::get('/roles', [RoleManagementController::class, 'roles'])->name('roles');
     Route::post('/add_new_role', [RoleManagementController::class, 'post_roles'])->name('add_new_role');
     Route::post('/roles', [RoleManagementController::class, 'post_roles'])->name('post_roles');
+
 
     Route::get('/departments', [DepartmentManagementController::class, 'departments'])->name('departments');
     Route::get('/superadmin/departments', [DepartmentManagementController::class, 'departments'])->name('departments');
@@ -134,6 +137,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('departments-applications/update-application-status', [DepartmentManagementController::class, 'updateStatus'])->name('updateStatus');
     Route::post('/departments-applications/soft-delete-employee-app', [DepartmentManagementController::class, 'softDeleteDepartmentApp'])->name('softDeleteDepartmentApp');
 
+
     Route::get('/departments_employees', [DepartmentManagementController::class, 'departments_employees'])->name('departments_employees');
     Route::get('/departments_employees/get-employees-by-company/{companyId}', [DepartmentManagementController::class, 'getEmpCompanyData'])->name('get_employees_by_company');
     Route::get('/departments_employees/add', [DepartmentManagementController::class, 'add_edit_departments_employees'])->name('add_edit_departments_employees');
@@ -143,9 +147,11 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/employees-applications/update-application-status', [DepartmentManagementController::class, 'updateStatusEmpApp'])->name('updateStatusEmpApp');
     Route::post('/employees-applications/soft-delete-employee-app', [DepartmentManagementController::class, 'softDeleteEmployeeApp'])->name('softDeleteEmployeeApp');
 
+
     Route::get('/permissions', [RoleManagementController::class, 'permissions'])->name('permissions');
     Route::get('/permission/edit/{permission_id}', [RoleManagementController::class, 'permissions'])->name('permission.edit');
     Route::post('/permissions', [RoleManagementController::class, 'post_permissions'])->name('post_permissions');
+
 
     Route::get('/employees', [EmployeeManagementController::class, 'employees_api'])->name('employees_api');
     Route::get('/employee/add_new', [EmployeeManagementController::class, 'add_edit_employee'])->name('employees.add_employee');
@@ -157,6 +163,7 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/employee/activity/{employee_id}', [EmployeeManagementController::class, 'activity'])->name('employees.activity');
     Route::get('/employee/activity_ss/{employee_id}', [EmployeeManagementController::class, 'activity_ss'])->name('employees.activity_ss');
     
+
     Route::get('/getEmployees/{department?}/{depts?}',[ApplicationManagementController::class, 'getEmployees']);
     Route::post('/getEmployees/{department?}/{depts?}',[ApplicationManagementController::class, 'getEmployees']);
     Route::post('/make_productive',[ApplicationManagementController::class, 'make_productive']);

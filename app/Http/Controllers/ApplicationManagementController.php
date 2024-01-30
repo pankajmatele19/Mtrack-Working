@@ -7,7 +7,7 @@ use App\Models\Application;
 use App\Models\CompanyApplicationsCategory;
 use App\Models\CompanyTeamRole;
 use App\Models\Department;
-use App\Models\Employee;
+use App\Models\DepartmentWiseProductiveApp;
 use App\Models\EmployeeWiseProductiveApp;
 use App\Models\SuperadminTeamRole;
 use App\Models\User;
@@ -155,6 +155,7 @@ class ApplicationManagementController extends Controller
             ->select('dp.*')
             ->distinct()
             ->get();
+
         // dd($departments);
 
         $employees = DB::table('employees as emp')
@@ -197,8 +198,6 @@ class ApplicationManagementController extends Controller
     // public function getEmployees(Request $request, $dpid, $depts)
     // {
 
-
-
     //     if ($dpid == 'alldept') {
     //         $employees = DB::table('employees as emp')
     //             ->select('emp.*')
@@ -231,15 +230,12 @@ class ApplicationManagementController extends Controller
     //             ->pluck('id');
     //         // dd($departments);
 
-
-
     //         $employees = DB::table('employees as emp')
     //             ->select('emp.name')
     //             ->whereIn('emp.department_id', $departments)
     //             ->pluck('name');
 
     //         // dd($employees);
-
 
     //     }
     //     return response()->json($employees);
@@ -267,6 +263,8 @@ class ApplicationManagementController extends Controller
 
             return response()->json($employees);
         } else {
+
+
             // Fetch employees based on the selected department
             $departments = DB::table('departments as dp')
                 ->join('employees as emp', 'emp.company_id', '=', 'dp.company_id')
@@ -289,28 +287,77 @@ class ApplicationManagementController extends Controller
     {
         // dd($request->all());
 
-        
-        $prodapp_emp = new EmployeeWiseProductiveApp();
-        
-        $employees = DB::table('employees as emp')
-            ->select('emp.id', 'emp.company_id')
-            ->whereIn('emp.name', (array) $request->employee) // Ensure it's an array
-            ->get();
+        if (!empty($request->employee)) {
 
-        // dd($employees);
-
-        foreach ($employees as $employee) {
             $prodapp_emp = new EmployeeWiseProductiveApp();
 
-            $prodapp_emp->employee_id = $employee->id;
-            $prodapp_emp->company_id = $employee->company_id;
-            $prodapp_emp->app_id = $request->input('appid');
+            $employees = DB::table('employees as emp')
+                ->select('emp.id', 'emp.company_id')
+                ->whereIn('emp.name', (array) $request->employee) // Ensure it's an array
+                ->get();
 
-            // Save the application for each employee
-            $prodapp_emp->save();
+            // dd($employees);
+
+            foreach ($employees as $employee) {
+                $prodapp_emp = new EmployeeWiseProductiveApp();
+
+                $prodapp_emp->employee_id = $employee->id;
+                $prodapp_emp->company_id = $employee->company_id;
+                $prodapp_emp->app_id = $request->input('appid');
+
+                // Save the application for each employee
+                $prodapp_emp->save();
+            }
+
+            return redirect()->route('applications')->with('success', 'Applications saved successfully!');
+        } elseif ($request->depts === ['alldept']) {
+
+            $department = DB::table('departments as dp')
+                ->select('dp.company_id', 'dp.id') // Ensure it's an array
+                ->get();
+
+            // dd($department);
+
+            foreach ($department as $dep) {
+                $prodapp_dep = new DepartmentWiseProductiveApp();
+
+                $prodapp_dep->department_id = $dep->id;
+                $prodapp_dep->company_id = $dep->company_id;
+                $prodapp_dep->app_id = $request->input('appid');
+
+                // Save the application for each employee
+                $prodapp_dep->save();
+            }
+
+            return redirect()->route('applications')->with('success', 'Applications saved successfully!');
+
+        } else {
+
+            $proapp_dep = new DepartmentWiseProductiveApp();
+
+            $department = DB::table('departments as dp')
+                ->select('dp.company_id')
+                ->whereIn('dp.id', (array) $request->depts) // Ensure it's an array
+                ->get();
+
+            // dd($department);
+
+            foreach ($department as $dep) {
+                $prodapp_dep = new DepartmentWiseProductiveApp();
+
+                foreach ($request->input('depts') as $deptId) {
+                    $prodapp_dep->department_id = $deptId;
+                    $prodapp_dep->company_id = $dep->company_id;
+                    $prodapp_dep->app_id = $request->input('appid');
+
+                    // Save the application for each employee
+                    $prodapp_dep->save();
+                }
+            }
+
+            return redirect()->route('applications')->with('success', 'Applications saved successfully!');
+
         }
-
-        return redirect()->route('applications')->with('success', 'Applications saved successfully!');
     }
 
 
