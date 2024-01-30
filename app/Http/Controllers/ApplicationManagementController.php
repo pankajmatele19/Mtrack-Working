@@ -6,6 +6,9 @@ use App\Models\Company;
 use App\Models\Application;
 use App\Models\CompanyApplicationsCategory;
 use App\Models\CompanyTeamRole;
+use App\Models\Department;
+use App\Models\Employee;
+use App\Models\EmployeeWiseProductiveApp;
 use App\Models\SuperadminTeamRole;
 use App\Models\User;
 use Illuminate\Support\Facades\Validator;
@@ -73,7 +76,8 @@ class ApplicationManagementController extends Controller
                 if ($request->has('search')) {
                     $name = $request->search;
                     if (isset($name['value'])) {
-                        $name = $name['value'];       
+
+                        $name = $name['value'];
                         $applications = $applications->where(function ($query) use ($name) {
                             $query->where('companies.company_name', 'like', '%' . $name . '%');
                             // ->orWhere('jp.job_title', 'like', '%' . $name . '%');
@@ -101,24 +105,32 @@ class ApplicationManagementController extends Controller
                     ->limit($limit)
                     ->get();
 
+
                 $data = [];
-                foreach ($applications->where('active', 1) as $key => $val) {
+                foreach ($applications->where('status', 1) as $key => $val) {
+
+                    // dd($val->id);
 
                     $data[] = [
-                        // 'interviews' => view('job_posts.schedule_interviews_table_columns.interviews_details', $column_data)->render(),
-                        // 'candidates' => view('job_posts.schedule_interviews_table_columns.candidates_details', $column_data)->render(),
-                        // 'rating' => view('job_posts.schedule_interviews_table_columns.overall_rating', $column_data)->render(),
 
-                        'is_nonproductive' => view('applications.switch', compact('val'))->render(),
+                        // 'is_nonproductive' => view('applications.switch', compact('val'))->render(),
                         'app_name' => "<span>" . (isset($val->app_name) ? $val->app_name : '-') . "</span><br>",
                         'description' => "<span>" . (isset($val->description) ? $val->description : '-') . "</span><br>",
                         'company_name' => "<span>" . (isset($val->company_name) ? $val->company_name : '-') . "</span><br>",
+
+                        'app_id' => "<span>" . (isset($val->id) ? $val->id : '-') . "</span><br>",
+
                         'category_name' => "<span>" . (isset($val->category_name) ? $val->category_name : '-') . "</span><br>",
+
+                        // 'make_productive' => '<button type="button" class="btn btn-primary btn-sm make-productive" data-toggle="modal" data-target="#myModal data-id="' . (isset($val->app_name) ? $val->app_name : '') . '">Make Productive</button>',
+
                         'action' => view('applications.actions', compact('val'))->render(),
-                        // 'type' => '<span class="badge badge-' . ((isset($value->interview_type) && $value->interview_type == 0) ? "success" : "warning") . '">' . ((isset($value->interview_type) && $value->interview_type == 0) ? "In Office" : "Virtual") . '</span>',
-                        // 'datetime' => formatting_date_time($user->organization_id, $value->interview_date_time, 1)['datetime'],
-                        // 'action' => view('job_posts.schedule_interviews_table_columns.action_column', $column_data)->render()
+
+
                     ];
+
+                    // dd($data);
+
                 }
 
                 $jsonResponse = [
@@ -130,13 +142,36 @@ class ApplicationManagementController extends Controller
 
                 return response()->json($jsonResponse);
             }
+
         }
 
-        $applications = $applications->get();
+
+
+        // $app_id = $applications->select('cappnp.id')->get();
+        // dd($app_id);
+
+        $departments = DB::table('departments as dp')
+            ->join('employees as emp', 'emp.company_id', '=', 'dp.company_id')
+            ->select('dp.*')
+            ->distinct()
+            ->get();
+        // dd($departments);
+
+        $employees = DB::table('employees as emp')
+            ->join('departments as dp', 'emp.company_id', '=', 'dp.company_id')
+            ->select('emp.name')
+            ->distinct()
+            ->get();
 
         $pageData['applications'] = $applications;
+        $pageData['departments'] = $departments;
+        // $pageData['emp'] = $employees;
+
+        // dd($pageData);
         return view('applications.applications', $pageData);
     }
+
+
 
     public function updateStatus(Request $request)
     {
@@ -150,6 +185,137 @@ class ApplicationManagementController extends Controller
 
         return;
     }
+
+    // public function getDepartments(Request $request, $department)
+    // {
+    //     // Fetch employees based on the selected department
+    //     $departments = Department::where('department_name', $department)->pluck('name', 'id');
+
+    //     return response()->json($departments);
+    // }
+
+    // public function getEmployees(Request $request, $dpid, $depts)
+    // {
+
+
+
+    //     if ($dpid == 'alldept') {
+    //         $employees = DB::table('employees as emp')
+    //             ->select('emp.*')
+    //             ->get();
+
+    //         dd($employees);
+    //     }
+
+
+    //     elseif (!empty($depts)) {
+    //         // Convert comma-separated string to an array
+    //         $selectedDepartments = explode(',', $depts);
+
+    //         // dd($selectedDepartments);
+
+    //         // Fetch employees based on the selected departments
+    //         $employees = DB::table('employees as emp')
+    //             ->select('emp.name')
+    //             ->whereIn('emp.department_id', $selectedDepartments)
+    //             ->pluck('name');
+    //     } 
+    //     else {
+
+    //         // Fetch employees based on the selected department
+    //         $departments = DB::table('departments as dp')
+    //             ->join('employees as emp', 'emp.company_id', '=', 'dp.company_id')
+    //             ->select('dp.id')
+    //             ->where('dp.id', '=', $dpid)
+    //             ->distinct()
+    //             ->pluck('id');
+    //         // dd($departments);
+
+
+
+    //         $employees = DB::table('employees as emp')
+    //             ->select('emp.name')
+    //             ->whereIn('emp.department_id', $departments)
+    //             ->pluck('name');
+
+    //         // dd($employees);
+
+
+    //     }
+    //     return response()->json($employees);
+    // }
+
+    public function getEmployees(Request $request, $dpid, $depts)
+    {
+        if ($dpid === 'alldept') {
+            $employees = DB::table('employees as emp')
+                ->select('emp.*', 'dp.department_name')
+                ->join('departments as dp', 'emp.department_id', '=', 'dp.id')
+                ->get();
+
+            return response()->json($employees);
+        } elseif (!empty($depts)) {
+            // Convert comma-separated string to an array
+            $selectedDepartments = explode(',', $depts);
+
+            // Fetch employees based on the selected departments
+            $employees = DB::table('employees as emp')
+                ->select('emp.name', 'dp.department_name')
+                ->join('departments as dp', 'emp.department_id', '=', 'dp.id')
+                ->whereIn('emp.department_id', $selectedDepartments)
+                ->get();
+
+            return response()->json($employees);
+        } else {
+            // Fetch employees based on the selected department
+            $departments = DB::table('departments as dp')
+                ->join('employees as emp', 'emp.company_id', '=', 'dp.company_id')
+                ->select('dp.id', 'dp.department_name')
+                ->where('dp.id', '=', $dpid)
+                ->distinct()
+                ->pluck('dp.id');
+
+            $employees = DB::table('employees as emp')
+                ->select('emp.name', 'dp.department_name')
+                ->join('departments as dp', 'emp.department_id', '=', 'dp.id')
+                ->whereIn('emp.department_id', $departments->id)
+                ->get();
+
+            return response()->json($employees);
+        }
+    }
+
+    public function make_productive(Request $request)
+    {
+        // dd($request->all());
+
+        
+        $prodapp_emp = new EmployeeWiseProductiveApp();
+        
+        $employees = DB::table('employees as emp')
+            ->select('emp.id', 'emp.company_id')
+            ->whereIn('emp.name', (array) $request->employee) // Ensure it's an array
+            ->get();
+
+        // dd($employees);
+
+        foreach ($employees as $employee) {
+            $prodapp_emp = new EmployeeWiseProductiveApp();
+
+            $prodapp_emp->employee_id = $employee->id;
+            $prodapp_emp->company_id = $employee->company_id;
+            $prodapp_emp->app_id = $request->input('appid');
+
+            // Save the application for each employee
+            $prodapp_emp->save();
+        }
+
+        return redirect()->route('applications')->with('success', 'Applications saved successfully!');
+    }
+
+
+
+
     public function getCategories($companyId)
     {
         // Fetch categories based on the $companyId
@@ -200,13 +366,14 @@ class ApplicationManagementController extends Controller
             ->select('company_applications_nonproductive.category_id', 'company_applications_categories.category_name')
             ->distinct()
             ->get();
+
         // dd($categories);
+
         $pageData['categories'] = $categories;
 
         if (!empty($app_id)) {
             $app_details = $applications->where('id', $app_id)->first();
             $pageData['category_id'] = $app_details->category_id;
-
             $pageData['app_details'] = $app_details;
             $pageData['edit_app_details'] = true;
 
@@ -274,7 +441,7 @@ class ApplicationManagementController extends Controller
         // Update the active status in the database (soft delete)
         DB::table('company_applications_nonproductive')
             ->where('id', $applicationId)
-            ->update(['active' => 0]);
+            ->update(['status' => 0]);
 
         return response()->json(['message' => 'Record deleted successfully']);
     }
@@ -297,6 +464,7 @@ class ApplicationManagementController extends Controller
         }
 
         $pageData['categories'] = $categories;
+
         // $pageData['companies'] = $companies;
         return view('applications.applications_categories', $pageData);
     }
@@ -318,6 +486,14 @@ class ApplicationManagementController extends Controller
         if ($request->ajax()) {
             // Check if it's an AJAX request for modal content
             $pageData['onmodal'] = true;
+            $companies = DB::table('companies')
+
+                ->select('companies.company_name')
+                ->get();
+
+            // dd($companies->toArray());
+
+            $pageData['companies'] = $companies;
             $modal_content = view('applications.add_edit_category_modal_content', $pageData)->render();
             return $modal_content;
         }

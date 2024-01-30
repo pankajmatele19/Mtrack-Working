@@ -34,7 +34,10 @@
         integrity="sha512-zoJXRvW2gC8Z0Xo3lBbao5+AS3g6YWr5ztKqaicua11xHo+AvE1b0lT9ODgrHTmNUxeCw0Ry4BGRYZfXu70weg=="
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script>
-        // Frame-busting to prevent site from being loaded within a frame without permission (click-jacking) if (window.top != window.self) { window.top.location.replace(window.self.location.href); }
+        // Frame - busting to prevent site from being loaded within a frame without permission(click - jacking) if (window
+        //     .top != window.self) {
+        //     window.top.location.replace(window.self.location.href);
+        // }
     </script>
     <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
     {{-- <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-datepicker@1.9.0/dist/css/bootstrap-datepicker3.min.css">
@@ -44,7 +47,8 @@
     <link rel="stylesheet" href="https://cdn.datatables.net/1.13.5/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.datatables.net/buttons/2.4.1/css/buttons.dataTables.min.css">
 
-    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+
+
 
     <style>
         /*  datatables css  */
@@ -195,7 +199,9 @@
     </script>
     <!--end::Theme mode setup on page load-->
     <!--begin::App-->
+
     <div class="d-flex flex-column flex-root app-root" id="kt_app_root">
+
         <!--begin::Page-->
         <div class="app-page flex-column flex-column-fluid" id="kt_app_page">
 
@@ -249,7 +255,7 @@
                                         <!--begin::Item-->
                                         <li class="breadcrumb-item text-muted"><a
                                                 href="{{ isset($routeName) ? url('superadmin/applications') : url('/applications') . (isset($prev_page_id) ? '/' . $prev_page_id : '') }}"
-                                                class="text-muted text-hover-primary">Applications</li>
+                                                class="text-muted text-hover-primary">Non Productive</li>
                                         <!--end::Item-->
                                         @yield('breadcrumb')
                                     </ul>
@@ -392,9 +398,9 @@
                                                 <thead>
                                                     <tr
                                                         class="text-start text-gray-400 fw-bold fs-7 text-uppercase gs-0">
-                                                        <th class="w-10px pe-2">
-                                                            Is Non-Productive
-                                                        </th>
+                                                        {{-- <th class="w-10px pe-2">
+                                                            Non-Productive
+                                                        </th> --}}
                                                         <th class="min-w-125px">App Name</th>
                                                         <th class="min-w-125px">Description</th>
                                                         {{-- @if ($flag == 1) --}}
@@ -402,7 +408,7 @@
                                                         {{-- @endif --}}
                                                         <th class="min-w-125px">Category</th>
                                                         <th class="text-center min-w-70px">Actions</th>
-                                                    </tr>
+
                                                 </thead>
                                             </table>
                                             <!--end::Table-->
@@ -560,6 +566,7 @@
                                                 <!--end::Modal body-->
                                             </div>
                                             <!--end::Modal content-->
+
                                         </div>
                                         <!--end::Modal dialog-->
                                     </div>
@@ -573,6 +580,63 @@
                         </div>
                         <!--end::Content-->
                     </div>
+
+                    {{-- Make Productive Modal Start  --}}
+
+                    <div class="modal fade" id="myModal" tabindex="-1">
+                        <!--begin::Modal dialog-->
+                        <div class="modal-dialog modal-dialog-centered mw-600px">
+                            <!--begin::Modal content-->
+                            <div class="modal-content">
+
+                                <div class="modal-header">
+                                    <h4>Make Productive</h4>
+                                    <!-- Add close button -->
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                        aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="productive">
+                                        @csrf
+                                        <input type="hidden" id="Appid" name="appid" value="">
+                                        <label class="mt-4" for="Department">Department</label>
+                                        <select name="depts[]" multiple="multiple" id="departmentSelect"
+                                            class="form-select mt-4 js-example-basic-multiple">
+                                            <option value="alldept">All Departments</option>
+                                            @if (isset($departments))
+                                                @foreach ($departments as $val)
+                                                    <option value="{{ $val->id }}">
+                                                        {{ $val->department_name }}</option>
+                                                @endforeach
+                                            @endif
+                                        </select>
+                                        <label class="mt-4" for="Department">Employee</label>
+                                        <select id="employeeSelect" name="employee[]"
+                                            class="form-select mt-4 js-example-basic-multiple" multiple>
+                                            <option value="allemp">All Employees</option>
+                                            {{-- @if (isset($employees))
+                                                @foreach ($employees as $val)
+                                                    <option value="{{ $val->name }}">
+                                                        {{ $val->name }}</option>
+                                                @endforeach
+                                            @endif --}}
+                                        </select>
+                                        <div class="text-center mt-4">
+                                            <button type="submit" id="productive_submit"
+                                                class="btn btn-primary">Submit
+                                                {{-- <span class="indicator-label">Submit</span>
+                                                <span class="indicator-progress">Please wait...
+                                                    <span
+                                                        class="spinner-border spinner-border-sm align-middle ms-2"></span></span> --}}
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {{-- Make Productive Modal End  --}}
+
                     @include('components.footer')
 
                 </div>
@@ -592,6 +656,10 @@
     <script src="{{ asset('assets/plugins/custom/ckeditor/ckeditor-classic.bundle.js') }}"></script>
     <!--end::Global Javascript Bundle-->
 
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
+
+
     <script src="{{ asset('assets/js/widgets.bundle.js') }}"></script>
     <script src="{{ asset('assets/js/custom/widgets.js') }}"></script>
     <script src="{{ asset('assets/js/custom/apps/chat/chat.js') }}"></script>
@@ -603,7 +671,7 @@
     {{-- @include('components.scripts') --}}
     <script src="assets/plugins/custom/datatables/datatables.bundle.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
+    <script script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
     <!--Begin DATATABLE JS-->
     {{-- start: datatable script --}}
@@ -618,12 +686,120 @@
     {{-- end: datatable script --}}
     <!--End DATATABLE JS-->
     @yield('script')
+
+    <script>
+        // document.addEventListener('DOMContentLoaded', function() {
+        //     // Add an event listener to the document for the 'make-productive' class
+        //     document.addEventListener('click', function(event) {
+        //         // Check if the clicked element has the 'make-productive' class
+        //         $('#myModal').modal('show');
+        //         if (event.target.classList.contains('make-productive')) {
+        //             // Prevent the default behavior of the anchor tag (e.g., prevent navigation)
+        //             event.preventDefault();
+        //             var dataId = $(this).attr('data-id');
+        //             console.log(dataId);
+        //             $('#Appid').val(dataId);
+        //             // Open the modal programmatically
+        //         }
+        //     });
+
+        // });
+    </script>
+    <script>
+        $(document).ready(function() {
+
+            $(document).on('click', '.make-productive', function(e) {
+                e.preventDefault();
+                $('#myModal').modal('show');
+                $('#Appid').val($(this).attr('data-id'));
+            })
+            // Submit event for the form
+            $(document).on('submit', '#productive', function(e) {
+                e.preventDefault();
+
+                // Rest of your form submission code
+                var formData = $('#productive').serialize();
+                // AJAX request with valId included in the URL or data
+                $.ajax({
+                    url: '/make_productive', // Include valId in the URL
+                    method: 'POST',
+                    data: formData,
+                    success: function(response) {
+                        // Handle the success response from the controller
+                        console.log(response);
+                    },
+                    error: function(error) {
+                        // Handle the error response from the controller
+                        console.error('Error submitting form:', error);
+                    }
+                });
+            });
+
+        });
+    </script>
+
+    {{-- make productive select fields function --}}
+
+    <script>
+        $(document).ready(function() {
+
+
+            // Handle change event on the department select field
+            $('#departmentSelect').on('change', function() {
+                var department = $(this).val();
+                selectedDept = $('#departmentSelect').val();
+
+                // Make an AJAX request to fetch employees based on the selected department
+                $.ajax({
+                    url: '/getEmployees/' + department + '/' + selectedDept,
+                    method: 'GET',
+                    success: function(data) {
+                        // Clear previous options
+                        $('#employeeSelect').empty();
+
+                        // Organize employees into option groups
+                        var groupedEmployees = {};
+                        $.each(data, function(index, employee) {
+                            if (!groupedEmployees[employee.department_name]) {
+                                groupedEmployees[employee.department_name] = [];
+                            }
+                            groupedEmployees[employee.department_name].push(employee
+                                .name);
+                        });
+
+                        // Add option groups and employees to the employee select box
+                        $.each(groupedEmployees, function(department, employees) {
+                            var optgroup = $('<optgroup label="' + department + '">');
+                            $.each(employees, function(index, employee) {
+                                optgroup.append('<option class="ml-5" value="' +
+                                    employee +
+                                    '">' + employee + '</option>');
+                            });
+                            $('#employeeSelect').append(optgroup);
+                        });
+                    },
+                    error: function(error) {
+                        console.error('Error fetching employees:', error);
+                    }
+                });
+            });
+
+        });
+    </script>
+
+
+    <script>
+        $(document).ready(function() {
+            $('.js-example-basic-multiple').select2();
+        });
+    </script>
     <script>
         $(document).ready(function() {
 
 
             ajax_route_applications_table = {
                 url: "",
+                method: "GET",
                 data: function(data) {
                     data.customParam = 'applications_table'; // Add your extra parameter(s) here
                 },
@@ -634,11 +810,13 @@
                 }
             };
 
-            table_columns_applications_table = [{
-                    data: 'is_nonproductive',
-                    name: 'is_nonproductive',
-                    width: '25%'
-                },
+
+            table_columns_applications_table = [
+                // {
+                //     data: 'is_nonproductive',
+                //     name: 'is_nonproductive',
+                //     width: '25%'
+                // },
                 {
                     data: 'app_name',
                     name: 'app_name'
@@ -651,7 +829,7 @@
                     data: 'company_name',
                     name: 'company_name'
                     @if ($flag != 1)
-                        , visible: false
+                        visible: false
                     @endif
                 },
                 {
@@ -772,6 +950,7 @@
             });
         }
     </script>
+
 </body>
 <!--end::Body-->
 

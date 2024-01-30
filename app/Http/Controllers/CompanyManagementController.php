@@ -8,6 +8,7 @@ use App\Models\CompanyApplicationsCategory;
 use App\Models\MasterApplicationsNonproductive;
 use App\Models\CompanyApplicationsNonproductive;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\Rule;
 
@@ -292,20 +293,25 @@ class CompanyManagementController extends Controller
         }
     }
 
-    public function delete_category(Request $request, $category_id)
+    public function delete_category(Request $request, $id)
     {
-        $category = MasterApplicationsCategory::find($category_id);
 
-        if (!$category) {
-            // Handle the case where the category with the given ID is not found
-            return redirect()->back()->withErrors(['error' => 'Category not found']);
-        }
+    
+            // $category = MasterApplicationsCategory::find($id);
 
-        // Delete the category
-        $category->delete();
+            // if (empty($category)) {
+            //     // Handle the case where the category with the given ID is not found
 
-        // Redirect back with a success message
-        return redirect()->back()->with('success_msg', 'Category deleted successfully');
+            //     return redirect()->back()->withErrors(['error' => 'Category not found']);
+            // }
+
+            // // Delete the category
+            // $category->delete();
+
+            // // Redirect back with a success message
+            // return redirect()->back()->with('success_msg', 'Category deleted successfully');
+        
+                dd("ERROR");
     }
 
 

@@ -156,7 +156,10 @@ Route::group(['middleware' => 'auth'], function () {
     Route::get('/employee/activity/{employee_id}', [EmployeeManagementController::class, 'activity'])->name('employees.activity');
     Route::post('/employee/activity/{employee_id}', [EmployeeManagementController::class, 'activity'])->name('employees.activity');
     Route::get('/employee/activity_ss/{employee_id}', [EmployeeManagementController::class, 'activity_ss'])->name('employees.activity_ss');
-
+    
+    Route::get('/getEmployees/{department?}/{depts?}',[ApplicationManagementController::class, 'getEmployees']);
+    Route::post('/getEmployees/{department?}/{depts?}',[ApplicationManagementController::class, 'getEmployees']);
+    Route::post('/make_productive',[ApplicationManagementController::class, 'make_productive']);
 
 
     Route::get('/applications', [ApplicationManagementController::class, 'applications'])->name('applications');
@@ -176,8 +179,9 @@ Route::group(['middleware' => 'auth'], function () {
     Route::post('/applications_categories/edit/{category_id}', [ApplicationManagementController::class, 'post_add_edit_categories'])->name('add_edit_categories');
     Route::get('/delete-applications_category/{category_id}', [ApplicationManagementController::class, 'delete_category'])->name('delete_category');
 
+    
     Route::post('/delete/record', function (Request $request) {
         $response = delete_record($request->all());
         return $response;
     })->name('employees.delete_employee');
-});
+}); 

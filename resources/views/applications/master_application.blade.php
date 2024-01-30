@@ -62,6 +62,8 @@
                                             <a href="{{ url('/dashboard') }}"
                                                 class="text-muted text-hover-primary">Home</a>
                                         </li>
+
+                                        
                                         <!--end::Item-->
                                         @if (request()->is('categories/*') && isset($prev_page_id))
                                             <!--begin::Item-->

@@ -220,6 +220,7 @@ var KTAppEcommerceSaveCategory = function () {
             if (validator) {
                 validator.validate().then(function (status) {
                     console.log('validated!');
+                    console.log("gnhgnghdgjfnhghm");
 
                     if (status == 'Valid') {
                         submitButton.setAttribute('data-kt-indicator', 'on');

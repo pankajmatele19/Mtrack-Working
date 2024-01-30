@@ -19,11 +19,12 @@
 </div> --}}
 <!--end::Menu-->
 <div class="dropdown">
-    <button class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary" onclick="toggleDropdown()">
+    <button class="btn btn-sm btn-light btn-flex btn-center btn-active-light-primary"
+        drop-down="dropdownMenu_{{ $val->id }}" onclick="toggleDropdown(this)">
         Actions <i class="ki-duotone ki-down fs-5 ms-1"></i>
     </button>
 
-    <div id="dropdownMenu" class="dropdown-menu fw-semibold fs-7 w-125px py-4">
+    <div id="dropdownMenu_{{ $val->id }}" class="dropdown-menu fw-semibold fs-7 w-125px py-4">
         <div class="menu-item px-3">
             <a href="" class="menu-link px-3 edit_application" data-toggle="modal"
                 data-target="#editApplicationModal" data-application-id="{{ isset($val->id) ? $val->id : '' }}">
@@ -35,12 +36,20 @@
                 data-kt-datatable-table-filter="delete_row"
                 onclick="softDeleteCompanyApp({{ $val->id }})">Delete</a>
         </div>
+
+        <div class="menu-item px-3">
+            <a href="" class="make-productive menu-link px-3" data-toggle="modal" data-target="#myModal"
+                data-id="{{ $val->id }}">Make Productive</a>
+        </div>
+        {{-- 'make_productive' => '<a href="' . url('/applications') . '" class="make-productive" data-toggle="modal" data-target="#myModal data-id="' . (isset($val->app_name) ? $val->app_name : '') . '">Make Productive</a><br>', --}}
+
     </div>
 </div>
 
 <script>
-    function toggleDropdown() {
-        var dropdownMenu = document.getElementById('dropdownMenu');
+    function toggleDropdown(button) {
+        var dropdownMenuId = $(button).attr('drop-down');
+        var dropdownMenu = document.getElementById(dropdownMenuId);
         dropdownMenu.classList.toggle('show');
     }
 

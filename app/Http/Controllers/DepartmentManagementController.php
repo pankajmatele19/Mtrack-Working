@@ -309,7 +309,7 @@ class DepartmentManagementController extends Controller
             'department_id.*' => 'exists:departments,id',
             'app_id' => 'required|array',
             'app_id.*' => 'exists:company_applications_nonproductive,id',
-            // 'status' => 'in:0,1',
+            'status' => 'in:0,1',
             'category_id' => 'required|array',
             'category_id.*' => 'exists:company_applications_categories,id',
             // Add any other validation rules as needed
@@ -325,9 +325,10 @@ class DepartmentManagementController extends Controller
 
         try {
             // Save or update the data based on whether it's an edit or add operation
-            foreach ($request->input('department_id') as $key => $departmentId) {
+            foreach (
+                $request->input('department_id') as $key => $departmentId) {
                 $appId = $request->input('app_id')[$key];
-                // $status = $request->input('status')[$key];
+                $status = $request->input('status')[$key];
                 $categoryId = $request->input('category_id')[$key];
                 if (!empty($app_id)) {
                     // Edit operation
@@ -336,7 +337,7 @@ class DepartmentManagementController extends Controller
                     $app->first()->update([
                         'department_id' => $departmentId,
                         'app_id' => $appId,
-                        // 'status' => $status,
+                        'status' => $status,
                         'category_id' => $categoryId,
                         // Update other fields as needed
                     ]);
@@ -347,8 +348,8 @@ class DepartmentManagementController extends Controller
                     $appData = [
                         'department_id' => $departmentId,
                         'app_id' => $appId,
-                        // 'status' => $status,
-                        // 'category_id' => $categoryId,
+                        'status' => $status,
+                        'category_id' => $categoryId,
                         // Add other fields as needed
                     ];
 
@@ -364,7 +365,9 @@ class DepartmentManagementController extends Controller
                         $category_id = CompanyApplicationsNonProductive::findOrFail($request->input('app_id'))->category_id;
                         $appData['category_id'] = $category_id;
                     }
-                    // dd($appData);
+
+                    dd($appData['company_id']);
+
                     DepartmentNonProductiveApp::insert($appData);
 
                     $message = 'Department app details added successfully.';
@@ -524,120 +527,31 @@ class DepartmentManagementController extends Controller
         ];
         return response()->json($data);
     }
-    // public function post_add_edit_departments_employees(Request $request)
-    // {
-    //     $user = auth()->user();
-    //     $flag = $user->is_super_admin;
-
-    //     $rules = [
-    //         'employee_id' => 'required|exists:employees,id',
-    //         'company_id' => 'required|exists:companies,id',
-    //         'app_id' => 'required|exists:company_applications_nonproductive,id',
-    //         // Add other validation rules as needed
-    //     ];
-    //     // Add unique validation rule for employee, company, and app combination conditionally
-    //     if ($request->has('employee_id')) {
-    //         $rules['employee_id'] = Rule::unique('employee_wise_productive_apps')
-    //             ->where('company_id', $request->input('company_id'))
-    //             ->where('app_id', $request->input('app_id'));
-    //     }
-    //     // Validate the request
-    //     $request->validate($rules);
-
-    //     // Extract form data
-    //     $employeeId = $request->input('employee_id');
-    //     $companyId = $request->input('company_id');
-    //     $appId = $request->input('app_id');
-    //     // Extract other form data as needed
-
-    //     // Additional logic for non-super admin users
-    //     if (!$flag) {
-    //         // Ensure that the user can only modify records for their own company
-    //         if ($companyId != $user->company_id) {
-    //             // Handle unauthorized access
-    //             abort(403, 'Unauthorized action.');
-    //         }
-    //     }
-
-    //     // Save or update the record
-    //     if ($request->has('edit_employee_id')) {
-    //         // Editing an existing record
-    //         $editEmployeeId = $request->input('edit_employee_id');
-
-    //         DB::table('employee_wise_productive_apps')
-    //             ->where('id', $editEmployeeId)
-    //             ->update([
-    //                 'employee_id' => $employeeId,
-    //                 'company_id' => $companyId,
-    //                 'app_id' => $appId,
-    //                 // Update other fields as needed
-    //             ]);
-
-    //         $message = 'Employee record updated successfully.';
-    //     } else {
-    //         // Adding a new record
-    //         DB::table('employee_wise_productive_apps')->insert([
-    //             'employee_id' => $employeeId,
-    //             'company_id' => $companyId,
-    //             'app_id' => $appId,
-    //             // Add other fields as needed
-    //         ]);
-
-    //         $message = 'Employee record added successfully.';
-    //     }
-
-    //     return redirect()->route('departments_employees')->with('success', $message);
-    // }    
-
     public function post_add_edit_departments_employees(Request $request)
     {
         $user = auth()->user();
         $flag = $user->is_super_admin;
 
-        // Define validation rules
         $rules = [
-            'employee_id' => 'required|array',
-            'employee_id.*' => 'exists:employees,id',
+            'employee_id' => 'required|exists:employees,id',
             'company_id' => 'required|exists:companies,id',
-            'app_id' => 'required|array',
-            'app_id.*' => 'exists:company_applications_nonproductive,id',
-            'department_id' => 'required|array',
-            'department_id.*' => 'exists:departments,id',
-            'category_id' => 'required|array',
-            'category_id.*' => 'exists:company_applications_categories,id',
+            'app_id' => 'required|exists:company_applications_nonproductive,id',
             // Add other validation rules as needed
         ];
-
         // Add unique validation rule for employee, company, and app combination conditionally
         if ($request->has('employee_id')) {
             $rules['employee_id'] = Rule::unique('employee_wise_productive_apps')
                 ->where('company_id', $request->input('company_id'))
-                ->whereIn('app_id', $request->input('app_id'))
-                ->whereIn('department_id', $request->input('department_id'))
-                ->whereIn('category_id', $request->input('category_id'));
+                ->where('app_id', $request->input('app_id'));
         }
-
         // Validate the request
-        $validator = \Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            Log::error('Validation Errors: ' . json_encode($validator->errors()->all()));
-            return redirect()->back()->withErrors($validator)->withInput();
-        }
+        $request->validate($rules);
 
         // Extract form data
-        $employeeIds = $request->input('employee_id');
+        $employeeId = $request->input('employee_id');
         $companyId = $request->input('company_id');
-        $appIds = $request->input('app_id');
-        $departmentIds = $request->input('department_id');
-        $categoryIds = $request->input('category_id');
+        $appId = $request->input('app_id');
         // Extract other form data as needed
-
-        // Convert arrays to strings
-        $employeeIdsString = implode(',', $employeeIds);
-        $appIdsString = implode(',', $appIds);
-        $departmentIdsString = implode(',', $departmentIds);
-        $categoryIdsString = implode(',', $categoryIds);
 
         // Additional logic for non-super admin users
         if (!$flag) {
@@ -648,46 +562,135 @@ class DepartmentManagementController extends Controller
             }
         }
 
-        try {
-            // Save or update the data based on whether it's an edit or add operation
-            if ($request->has('edit_employee_id')) {
-                // Editing an existing record
-                $editEmployeeId = $request->input('edit_employee_id');
+        // Save or update the record
+        if ($request->has('edit_employee_id')) {
+            // Editing an existing record
+            $editEmployeeId = $request->input('edit_employee_id');
 
-                DB::table('employee_wise_productive_apps')
-                    ->where('id', $editEmployeeId)
-                    ->update([
-                        'employee_id' => $employeeIdsString,
-                        'company_id' => $companyId,
-                        'app_id' => $appIdsString,
-                        'department_id' => $departmentIdsString,
-                        'category_id' => $categoryIdsString,
-                        // Update other fields as needed
-                    ]);
-
-                $message = 'Employee record updated successfully.';
-            } else {
-                // Adding a new record
-                DB::table('employee_wise_productive_apps')->insert([
-                    'employee_id' => $employeeIdsString,
+            DB::table('employee_wise_productive_apps')
+                ->where('id', $editEmployeeId)
+                ->update([
+                    'employee_id' => $employeeId,
                     'company_id' => $companyId,
-                    'app_id' => $appIdsString,
-                    'department_id' => $departmentIdsString,
-                    'category_id' => $categoryIdsString,
-                    // Add other fields as needed
+                    'app_id' => $appId,
+                    // Update other fields as needed
                 ]);
 
-                $message = 'Employee record added successfully.';
-            }
+            $message = 'Employee record updated successfully.';
+        } else {
+            // Adding a new record
+            DB::table('employee_wise_productive_apps')->insert([
+                'employee_id' => $employeeId,
+                'company_id' => $companyId,
+                'app_id' => $appId,
+                // Add other fields as needed
+            ]);
 
-            // Redirect to the view with a success message
-            return redirect()->route('departments_employees')->with('success', $message);
-        } catch (\Exception $e) {
-            // Log the exception for debugging
-            Log::error("Error processing employee record: " . $e->getMessage());
-
-            // Handle exceptions (e.g., log, show error message)
-            return redirect()->back()->with('error', 'An error occurred while saving employee record.')->withInput();
+            $message = 'Employee record added successfully.';
         }
-    }
+
+        return redirect()->route('departments_employees')->with('success', $message);
+    }    
+
+    // public function post_add_edit_departments_employees(Request $request)
+    // {
+    //     $user = auth()->user();
+    //     $flag = $user->is_super_admin;
+
+    //     // Define validation rules
+    //     $rules = [
+    //         'employee_id' => 'required|array',
+    //         'employee_id.*' => 'exists:employees,id',
+    //         'company_id' => 'required|exists:companies,id',
+    //         'app_id' => 'required|array',
+    //         'app_id.*' => 'exists:company_applications_nonproductive,id',
+    //         'department_id' => 'required|array',
+    //         'department_id.*' => 'exists:departments,id',
+    //         'category_id' => 'required|array',
+    //         'category_id.*' => 'exists:company_applications_categories,id',
+    //         // Add other validation rules as needed
+    //     ];
+
+    //     // Add unique validation rule for employee, company, and app combination conditionally
+    //     if ($request->has('employee_id')) {
+    //         $rules['employee_id'] = Rule::unique('employee_wise_productive_apps')
+    //             ->where('company_id', $request->input('company_id'))
+    //             ->whereIn('app_id', $request->input('app_id'))
+    //             ->whereIn('department_id', $request->input('department_id'))
+    //             ->whereIn('category_id', $request->input('category_id'));
+    //     }
+
+    //     // Validate the request
+    //     $validator = \Validator::make($request->all(), $rules);
+
+    //     if ($validator->fails()) {
+    //         Log::error('Validation Errors: ' . json_encode($validator->errors()->all()));
+    //         return redirect()->back()->withErrors($validator)->withInput();
+    //     }
+
+    //     // Extract form data
+    //     $employeeIds = $request->input('employee_id');
+    //     $companyId = $request->input('company_id');
+    //     $appIds = $request->input('app_id');
+    //     $departmentIds = $request->input('department_id');
+    //     $categoryIds = $request->input('category_id');
+    //     // Extract other form data as needed
+
+    //     // Convert arrays to strings
+    //     $employeeIdsString = implode(',', $employeeIds);
+    //     $appIdsString = implode(',', $appIds);
+    //     $departmentIdsString = implode(',', $departmentIds);
+    //     $categoryIdsString = implode(',', $categoryIds);
+
+    //     // Additional logic for non-super admin users
+    //     if (!$flag) {
+    //         // Ensure that the user can only modify records for their own company
+    //         if ($companyId != $user->company_id) {
+    //             // Handle unauthorized access
+    //             abort(403, 'Unauthorized action.');
+    //         }
+    //     }
+
+    //     try {
+    //         // Save or update the data based on whether it's an edit or add operation
+    //         if ($request->has('edit_employee_id')) {
+    //             // Editing an existing record
+    //             $editEmployeeId = $request->input('edit_employee_id');
+
+    //             DB::table('employee_wise_productive_apps')
+    //                 ->where('id', $editEmployeeId)
+    //                 ->update([
+    //                     'employee_id' => $employeeIdsString,
+    //                     'company_id' => $companyId,
+    //                     'app_id' => $appIdsString,
+    //                     'department_id' => $departmentIdsString,
+    //                     'category_id' => $categoryIdsString,
+    //                     // Update other fields as needed
+    //                 ]);
+
+    //             $message = 'Employee record updated successfully.';
+    //         } else {
+    //             // Adding a new record
+    //             DB::table('employee_wise_productive_apps')->insert([
+    //                 'employee_id' => $employeeIdsString,
+    //                 'company_id' => $companyId,
+    //                 'app_id' => $appIdsString,
+    //                 'department_id' => $departmentIdsString,
+    //                 'category_id' => $categoryIdsString,
+    //                 // Add other fields as needed
+    //             ]);
+
+    //             $message = 'Employee record added successfully.';
+    //         }
+
+    //         // Redirect to the view with a success message
+    //         return redirect()->route('departments_employees')->with('success', $message);
+    //     } catch (\Exception $e) {
+    //         // Log the exception for debugging
+    //         Log::error("Error processing employee record: " . $e->getMessage());
+
+    //         // Handle exceptions (e.g., log, show error message)
+    //         return redirect()->back()->with('error', 'An error occurred while saving employee record.')->withInput();
+    //     }
+    // }
 }

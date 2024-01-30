@@ -31,12 +31,13 @@
                     <div class="fv-row mb-8">
                         <label for="company_id" class="form-label">Select Company</label>
                         <select name="company_id" id="company_id" class="form-control" required>
-                            {{-- @foreach ($companies as $company)
-                                <option value="{{ $company->id }}"
+
+                            @foreach ($companies as $company)
+                                <option 
                                     {{ isset($category_details->company_id) && $category_details->company_id == $company->id ? 'selected' : '' }}>
                                     {{ $company->company_name }}
                                 </option>
-                            @endforeach --}}
+                            @endforeach
                         </select>
                         <span class="field_errors" style="color: rgb(230, 33, 33)">
                             @error('company_id')

@@ -552,10 +552,10 @@
             function drawCharts() {
                 var employees = @json($employees);
                 employees.forEach(function(val, key) {
-                    if(val.activity!=null){
+                    if (val.activity != null) {
                         var data = google.visualization.arrayToDataTable([
                             ['Category', 'Active', 'Idle', 'Inactive'],
-                            [,val.activity.workingDuration / 3600, val.activity.idleTime / 3600, val.activity
+                            [, val.activity.workingDuration / 3600, val.activity.idleTime / 3600, val.activity
                                 .totalNonProductiveTimeusage / 3600
                             ]
                         ]);
@@ -627,7 +627,6 @@
             });
         });
     </script>
-
 
 
 

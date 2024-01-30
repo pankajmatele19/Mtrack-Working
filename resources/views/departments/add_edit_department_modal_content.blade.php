@@ -16,7 +16,7 @@
                     <div class="row">
                         <div class="fv-row mb-8">
                             <!--begin::Name-->
-                            <input type="text" placeholder="Enter Name" name="name" autocomplete="off"
+                            <input type="text" placeholder="Enter Name" name="app_name" autocomplete="off"
                                 class="form-control bg-transparent"
                                 value="{{ isset($dept_details->department_name) && !empty($dept_details->department_name) ? $dept_details->department_name : old('department_name') }}"
                                 required />

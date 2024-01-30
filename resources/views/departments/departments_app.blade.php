@@ -310,7 +310,7 @@
                                                 </thead>
                                                 <tbody class="fw-semibold text-gray-600">
                                                     {{-- @if (isset($departments_app)) --}}
-                                                    @foreach ($departmentNonProductiveApps->where('active', 1) as $val)
+                                                    @foreach ($departmentNonProductiveApps->where('status', 1) as $val)
                                                         <tr data-id="{{ $val->id }}">
                                                             <td>
                                                                 <div
